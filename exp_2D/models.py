@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn.functional as F
+import sys
+sys.path.append("/Users/mingruizhao/Desktop/EG3D_Hacker/exp_2D")
 from torch import einsum, nn
 from tqdm import tqdm
 from einops import rearrange
@@ -44,8 +46,8 @@ class dual_array(nn.Module):
     def forward(self, pts, image):
         self.feature_array = self.feature_gen(image).permute(1,0)
         res = self.feature_array.shape[0]
-        x = torch.floor(pts[:,0]*(res-1))
-        y = torch.floor(pts[:,1]*(res-1))
+        x = pts[:,0]*(res-1)
+        y = pts[:,1]*(res-1)
         x1 = torch.floor(torch.clip(x, 0, res - 1 - 1e-5)).long()
         y1 = torch.floor(torch.clip(y, 0, res - 1 - 1e-5)).long()
 
@@ -80,8 +82,8 @@ class dual_plane(nn.Module):
         feats = []
         # Iterate in every level of detail resolution
         for i, res in enumerate(self.LODS):
-            x = torch.floor(pts[:,0]*(res-1))
-            y = torch.floor(pts[:,1]*(res-1))
+            x = pts[:,0]*(res-1)
+            y = pts[:,1]*(res-1)
             x1 = torch.floor(torch.clip(x, 0, res - 1 - 1e-5)).long()
             y1 = torch.floor(torch.clip(y, 0, res - 1 - 1e-5)).long()
 
@@ -198,17 +200,17 @@ def main():
     max_epochs = 1000
     learning_rate = 5.0e-3
 
-    data_path = "./data/mong_tea.png"
+    data_path = "./exp_2D/data/mong_tea.png"
     img_size = 256
     num_imgs_per_iter = 2
     data_loader = get_loader(data_path, img_size, num_imgs_per_iter)
     
     # feature_gen = feature_array_generator()
-    smart_grid = dual_plane()
+    # smart_grid = dual_plane()
     # smart_grid = DenseGrid(interpolation_type="bilinear")  # "closest" or "bilinear"
-    # smart_grid = Baselinegrid()
+    smart_grid = Baselinegrid()
     # smart_grid = dual_array(feature_gen)
-    model = SimpleModel(smart_grid, 48, 128, 3, 4)
+    model = SimpleModel(smart_grid, 2, 128, 3, 4)
     loss_fn = torch.nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 

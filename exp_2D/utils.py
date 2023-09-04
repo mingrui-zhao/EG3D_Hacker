@@ -23,7 +23,7 @@ def show_model_stats(model):
     )
 
 
-def psnr_score(img1, img2):
+def psnr(img1, img2):
     mse = torch.mean((img1 - img2) ** 2)
     if mse == 0:
         return 100
